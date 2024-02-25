@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 
 # # Load images
-image1 = cv2.imread("../assets/image1small.png")
-image2 = cv2.imread("../assets/image2small.png")
+rgb_image = cv2.imread("../assets/rbg_image.png")
+thermal_image = cv2.imread("../assets/thermal_image.png")
 
 # # Detect key points and compute descriptors (using SIFT as an example)
 # sift = cv2.SIFT_create()
@@ -31,13 +31,13 @@ image2 = cv2.imread("../assets/image2small.png")
 therm_pts = [
     [238, 160],
     [264, 164],
-    [247, 223], 
+    [247, 223],
     [58, 220],
     [179, 512],
     [317, 506]
 ]
 # dst is visual
-vis_pts = [
+rbg_pts = [
     [320, 89],
     [357, 94],
     [332, 174],
@@ -48,13 +48,10 @@ vis_pts = [
 
 # Convert points to numpy arrays
 dst_pts = np.array(therm_pts).reshape(-1, 1, 2)
-src_pts = np.array(vis_pts).reshape(-1, 1, 2)
-
+src_pts = np.array(rbg_pts).reshape(-1, 1, 2)
 
 # Compute homography matrix using RANSAC
 homography_matrix, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-
-print(homography_matrix)
 
 def translatePoint(x, y):
     pt = np.array([[x], [y], [1]], dtype=np.float32)
@@ -72,21 +69,20 @@ def translatePoint(x, y):
 # Use homography matrix for transformation if needed
 # warped_image = cv2.warpPerspective(image1, homography_matrix, (image2.shape[1], image2.shape[0]))
 
+# image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY) #grayscale for brightness multiplying
+gray_thermal = cv2.cvtColor(thermal_image.copy(), cv2.COLOR_BGR2GRAY) #grayscale for brightness multiplying
+brightness_threshold = 75
+output_image = np.zeros_like(thermal_image)
 
 # Loop over all points in the image
-height, width = image1.shape[:2]
-for y in range(height):
-    for x in range(width):
+rgb_height, rgb_width = rgb_image.shape[:2]
+for y in range(rgb_height):
+    for x in range(rgb_width):
         tX, tY = translatePoint(x, y)
-        image2[tY, tX] = image1[y, x]
-        print(image2[tY, tX])
-        # for c in range(image1.shape[2]):
-        #     image2[tX, tY, c] = image1[x, y, c]
+        if gray_thermal[tY, tX] > brightness_threshold:
+            output_image[tY, tX] = rgb_image[y, x]
 
 
-
-# Display the images side by side
-# concatenated_images = np.concatenate((image1, image2), axis=1)
-cv2.imshow("Overlay", image2)
+cv2.imshow("Overlay", output_image)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
