@@ -18,8 +18,17 @@
    cd data-fusion-system
    ```
 2. **Run Setup**
+
    Modify `setup.sh` to have your preferred environment name.
    Then run:
    ```bash
    bash setup.sh
    ```
+
+### Adding new project packages
+1. **Export Rackages**
+
+   ```bash
+   pip freeze > requirements.txt
+   ```
+   Make sure to track requirements.txt on VCS.
