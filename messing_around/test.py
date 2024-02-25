@@ -28,20 +28,22 @@ image2 = cv2.imread("image2small.png")
 
 # Manually input corresponding points
 # used photpea to find points
+# src is thermal
 src_pts = [
     [238, 160],
     [264, 164],
-    [247, 223],
-    [85, 170],
+    [247, 223], 
+    [58, 220],
     [179, 512],
-    [317, 510]
+    [317, 506]
 ]
+# dst is visual
 dst_pts = [
     [320, 89],
     [357, 94],
     [332, 174],
-    [58, 220],
-    [224, 580],
+    [85, 170],
+    [236, 580],
     [428, 575]
 ]
 
@@ -55,6 +57,18 @@ homography_matrix, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
 
 print(homography_matrix)
 
+x = 317
+y = 506
+
+pt = np.array([[x], [y], [1]], dtype=np.float32)
+
+transformed_pt = np.dot(homography_matrix, pt)
+
+w = transformed_pt[2, 0]
+u = transformed_pt[0, 0] / w
+v = transformed_pt[1, 0] / w
+
+print(f"Transformed Point: ({u}, {v})")
 # Use homography matrix for transformation if needed
 warped_image = cv2.warpPerspective(image1, homography_matrix, (image2.shape[1], image2.shape[0]))
 
