@@ -71,17 +71,23 @@ def translatePoint(x, y):
 
 # image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY) #grayscale for brightness multiplying
 gray_thermal = cv2.cvtColor(thermal_image.copy(), cv2.COLOR_BGR2GRAY) #grayscale for brightness multiplying
-brightness_threshold = 75
 output_image = np.zeros_like(thermal_image)
+
+
+BRIGHTNESS_THRESHOLD = 75
+CUTOFF_THRESHOLD_ENABLED = True #todo not permanent
 
 # Loop over all points in the image
 rgb_height, rgb_width = rgb_image.shape[:2]
 for y in range(rgb_height):
     for x in range(rgb_width):
         tX, tY = translatePoint(x, y)
-        if gray_thermal[tY, tX] > brightness_threshold:
-            output_image[tY, tX] = rgb_image[y, x]
-
+        if CUTOFF_THRESHOLD_ENABLED:    #only show pixels over a certain brightness
+            if gray_thermal[tY, tX] > BRIGHTNESS_THRESHOLD:
+                output_image[tY, tX] = rgb_image[y, x]
+        else:   #scale all pixels by brightness
+            scale = gray_thermal[tY, tX] / 255.0
+            output_image[tY, tX] = (rgb_image[y, x] * scale).astype(np.uint8)
 
 cv2.imshow("Overlay", output_image)
 cv2.waitKey(0)
