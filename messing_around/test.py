@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 
-# print(cv2.__version__)
 # # Load images
 image1 = cv2.imread("../assets/image1small.png")
 image2 = cv2.imread("../assets/image2small.png")
@@ -73,14 +72,14 @@ def translatePoint(x, y):
 # Use homography matrix for transformation if needed
 # warped_image = cv2.warpPerspective(image1, homography_matrix, (image2.shape[1], image2.shape[0]))
 
-# Get the dimensions of the image
-height, width = image1.shape[:2]
 
 # Loop over all points in the image
+height, width = image1.shape[:2]
 for y in range(height):
     for x in range(width):
         tX, tY = translatePoint(x, y)
         image2[tY, tX] = image1[y, x]
+        print(image2[tY, tX])
         # for c in range(image1.shape[2]):
         #     image2[tX, tY, c] = image1[x, y, c]
 
@@ -88,11 +87,6 @@ for y in range(height):
 
 # Display the images side by side
 # concatenated_images = np.concatenate((image1, image2), axis=1)
-cv2.imshow("Matches", image2)
+cv2.imshow("Overlay", image2)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
-
-
-# source my_env/bin/activate then:
-# python3 filenaem
