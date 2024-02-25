@@ -3,8 +3,8 @@ import numpy as np
 
 # print(cv2.__version__)
 # # Load images
-image1 = cv2.imread("image1small.png")
-image2 = cv2.imread("image2small.png")
+image1 = cv2.imread("../assets/image1small.png")
+image2 = cv2.imread("../assets/image2small.png")
 
 # # Detect key points and compute descriptors (using SIFT as an example)
 # sift = cv2.SIFT_create()
