@@ -1,4 +1,5 @@
 '''
+Goal: have this file output the proper calibration points given a set of images with chessboards
 
 Link to FLIR website talking about calibration (including what OpenCV links to use)
 https://flir.custhelp.com/app/answers/detail/a_id/4639/~/flir-oem---boson%2C-lepton%2C-or-tau---intrinsic-thermal-camera-core-calibration#:~:text=The%20calibration%20can%20be%20done,halogen%20lamp%2C
