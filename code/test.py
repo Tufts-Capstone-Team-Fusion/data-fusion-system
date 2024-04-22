@@ -1,4 +1,5 @@
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 
 # # Load images
@@ -81,7 +82,7 @@ CUTOFF_THRESHOLD_ENABLED = True #todo not permanent
 rgb_height, rgb_width = rgb_image.shape[:2]
 for y in range(rgb_height):
     for x in range(rgb_width):
-        tX, tY = translatePoint(x, y)
+        tX, tY = translatePoint(x, y) 
         if CUTOFF_THRESHOLD_ENABLED:    #only show pixels over a certain brightness
             if gray_thermal[tY, tX] > BRIGHTNESS_THRESHOLD:
                 output_image[tY, tX] = rgb_image[y, x]
