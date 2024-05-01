@@ -40,7 +40,7 @@ def split_video(input_video_path, output_left_path, output_right_path):
     right_video_writer.release()
     video_capture.release()
 
-input_video = "../assets/sideBySide.mp4"
-output_left_path = "../assets/left_video.mp4"
-output_right_path = "../assets/right_video.mp4"
+input_video = "../assets/sideBySide2.mp4"
+output_left_path = "../assets/rgb_video3.mp4"
+output_right_path = "../assets/thermal_video3.mp4"
 split_video(input_video, output_left_path, output_right_path)

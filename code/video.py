@@ -59,8 +59,11 @@ def doCalibration(rgb_image, thermal_image):
     return homography_matrix
 
 print("extracting videos to frames")
-thermal_frames = extract_frames("../assets/thermal_video.mp4")
-rgb_frames = extract_frames("../assets/rgb_video.mp4")
+thermal_frames = extract_frames("../assets/thermal_video3.mp4")
+rgb_frames = extract_frames("../assets/rgb_video3.mp4")
+
+print(len(thermal_frames))
+print(len(rgb_frames))
 
 print("done extracting videos")
 print("checking if calibration matrix exists")
@@ -71,7 +74,7 @@ if os.path.exists('calibration_matrix.npy'):
 else:
     print("calibration matrix not found, calibrating")
     print("click matching points in the same order")
-    homography_matrix = doCalibration(rgb_frames[0], thermal_frames[0])
+    homography_matrix = doCalibration(rgb_frames[0].copy(), thermal_frames[0].copy())
 
 if homography_matrix is None:
     print("something went wrong, exiting")
@@ -97,7 +100,6 @@ def checkPoint(x, y, maxX, maxY):
     return True
 
 def combine_images(rgb_image, thermal_image):
-    print("combining images")
     gray_thermal = cv2.cvtColor(thermal_image.copy(), cv2.COLOR_BGR2GRAY) #grayscale for brightness multiplying
     output_image = np.zeros_like(thermal_image)
 
@@ -115,10 +117,55 @@ def combine_images(rgb_image, thermal_image):
     return output_image
 
 
+def combine_images2(rgb_image, thermal_image):
+    gray_thermal = cv2.cvtColor(thermal_image.copy(), cv2.COLOR_BGR2GRAY) #grayscale for brightness multiplying
+
+    warped_img = cv2.warpPerspective(rgb_image, homography_matrix, (gray_thermal.shape[1], gray_thermal.shape[0]))
+
+    gray_thermal_rgb = cv2.cvtColor(gray_thermal, cv2.COLOR_GRAY2BGR)
+
+    # rgb_height, rgb_width = rgb_image.shape[:2]
+    # for y in range(rgb_height):
+    #     for x in range(rgb_width):
+    #         scale = gray_thermal[y, x] / 255.0
+    #         thermal_image[y, x] = (rgb_image[y, x] * scale).astype(np.uint8)
+
+    alpha = 0.5
+
+    # Blend the images
+    output_image = cv2.addWeighted(thermal_image, alpha, warped_img, 1 - alpha, 0)
+
+    return output_image
+
+
+# warps the image and then
+def combine_images3(rgb_image, thermal_image):
+    gray_thermal = cv2.cvtColor(thermal_image.copy(), cv2.COLOR_BGR2GRAY) #grayscale for brightness multiplying
+
+    warped_img = cv2.warpPerspective(rgb_image, homography_matrix, (gray_thermal.shape[1], gray_thermal.shape[0]))
+
+    # gray_thermal_rgb = cv2.cvtColor(gray_thermal, cv2.COLOR_GRAY2BGR)
+
+    rgb_height, rgb_width = rgb_image.shape[:2]
+    for y in range(rgb_height):
+        for x in range(rgb_width):
+            scale = gray_thermal[y, x] / 255.0
+            thermal_image[y, x] = (rgb_image[y, x] * scale).astype(np.uint8)
+
+    # alpha = 0.5
+
+    # Blend the images
+    # output_image = cv2.addWeighted(thermal_image, alpha, warped_img, 1 - alpha, 0)
+
+    return thermal_image
+
+
 def combine_videos(rgb, thermal):
     frames = []
-    for i in range(len(rgb)):
-        fusedIm = combine_images(rgb[i], thermal[i])
+    maxFrames = 400
+    for i in range(maxFrames):
+        print("combining images (", i, "/", maxFrames, ")")
+        fusedIm = combine_images2(rgb[i], thermal[i])
         frames.append(fusedIm)
     return frames
 
@@ -141,5 +188,5 @@ def frames_to_video(frames, output_video_path, fps=60):
 print("combining frames")
 combined_frames = combine_videos(rgb_frames, thermal_frames)
 print("making video")
-frames_to_video(combined_frames, "../assets/fused.mp4")
+frames_to_video(combined_frames, "../assets/fused10.mp4")
 print("done!")

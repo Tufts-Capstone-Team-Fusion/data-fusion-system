@@ -69,15 +69,15 @@ def doCalibration(rgb_image, thermal_image):
 
 
 # # # Load images
-rgb_image = cv2.imread("../assets/checkerboard.png")
-thermal_image = cv2.imread("../assets/check8.png")
+rgb_image = cv2.imread("../assets/rgb_image.png")
+thermal_image = cv2.imread("../assets/thermal_image.png")
 
 homography_matrix = None
 if os.path.exists('calibration_matrix.npy'):
     homography_matrix = np.load('calibration_matrix.npy')
 else:
     print("calibration matrix not found, calibrating")
-    homography_matrix = doCalibration(rgb_image, thermal_image)
+    homography_matrix = doCalibration(rgb_image.copy(), thermal_image.copy())
 
 if homography_matrix is None:
     print("something went wrong, exiting")
@@ -108,23 +108,31 @@ gray_thermal = cv2.cvtColor(thermal_image.copy(), cv2.COLOR_BGR2GRAY) #grayscale
 output_image = np.zeros_like(thermal_image)
 
 
-BRIGHTNESS_THRESHOLD = 75
-CUTOFF_THRESHOLD_ENABLED = True #todo not permanent
 
-maxY, maxX = gray_thermal.shape[:2]
+warped_img = cv2.warpPerspective(rgb_image, homography_matrix, (gray_thermal.shape[1], gray_thermal.shape[0]))
 
-# Loop over all points in the image
-rgb_height, rgb_width = rgb_image.shape[:2]
-for y in range(rgb_height):
-    for x in range(rgb_width):
-        tX, tY = translatePoint(x, y) 
-        if not checkPoint(tX, tY, maxX, maxY): continue
-        if CUTOFF_THRESHOLD_ENABLED:    #only show pixels over a certain brightness
-            if gray_thermal[tY, tX] > BRIGHTNESS_THRESHOLD:
-                output_image[tY, tX] = rgb_image[y, x]
-        else:   #scale all pixels by brightness
-            scale = gray_thermal[tY, tX] / 255.0
-            output_image[tY, tX] = (rgb_image[y, x] * scale).astype(np.uint8)
+alpha = 0.5
+
+# Blend the images
+output_image = cv2.addWeighted(thermal_image, alpha, warped_img, 1 - alpha, 0)
+
+# BRIGHTNESS_THRESHOLD = 75
+# CUTOFF_THRESHOLD_ENABLED = False #todo not permanent
+
+# maxY, maxX = gray_thermal.shape[:2]
+
+# # Loop over all points in the image
+# rgb_height, rgb_width = rgb_image.shape[:2]
+# for y in range(rgb_height):
+#     for x in range(rgb_width):
+#         tX, tY = translatePoint(x, y) 
+#         if not checkPoint(tX, tY, maxX, maxY): continue
+#         if CUTOFF_THRESHOLD_ENABLED:    #only show pixels over a certain brightness
+#             if gray_thermal[tY, tX] > BRIGHTNESS_THRESHOLD:
+#                 output_image[tY, tX] = rgb_image[y, x]
+#         else:   #scale all pixels by brightness
+#             scale = gray_thermal[tY, tX] / 255.0
+#             output_image[tY, tX] = (rgb_image[y, x] * scale).astype(np.uint8)
 
 cv2.imshow("Overlay", output_image)
 cv2.waitKey(0)
