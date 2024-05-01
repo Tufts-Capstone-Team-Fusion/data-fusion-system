@@ -5,6 +5,9 @@ import copy
 import os
 from get_frames import extract_frames
 
+# we used this function because our method for data collection was using obs and
+# screen recording both videos next to one another. We then needed a way to split
+# the video into two videos by splitting the video in half
 def split_video(input_video_path, output_left_path, output_right_path):
     # Open the input video
     video_capture = cv2.VideoCapture(input_video_path)
@@ -40,6 +43,7 @@ def split_video(input_video_path, output_left_path, output_right_path):
     right_video_writer.release()
     video_capture.release()
 
+# change these file paths to change the names of input/output files
 input_video = "../assets/sideBySide2.mp4"
 output_left_path = "../assets/rgb_video3.mp4"
 output_right_path = "../assets/thermal_video3.mp4"
